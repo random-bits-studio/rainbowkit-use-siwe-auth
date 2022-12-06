@@ -1,0 +1,59 @@
+{
+  "name": "@randombits/rainbowkit-use-siwe-auth",
+  "version": "0.0.0-semantically-released",
+  "description": "RainbowKit authentication adapter for Sign-In with Ethereum and use-siwe",
+  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/**",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepare": "husky install",
+    "lint": "prettier --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/random-bits-studio/rainbowkit-use-siwe-auth.git"
+  },
+  "keywords": [
+    "SIWE",
+    "Rainbowkit",
+    "auth",
+    "authentication",
+    "use-siwe",
+    "Ethereum",
+    "Web3"
+  ],
+  "author": "AJ May <aj@randombits.studio>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/random-bits-studio/rainbowkit-use-siwe-auth/issues"
+  },
+  "homepage": "https://github.com/random-bits-studio/rainbowkit-use-siwe-auth#readme",
+  "devDependencies": {
+    "@rainbow-me/rainbowkit": "^0.8.0",
+    "@randombits/use-siwe": "^1.1.1",
+    "@types/react": "^18.0.26",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.4",
+    "prettier": "^2.8.0",
+    "tsup": "^6.5.0",
+    "typescript": "^4.8.3"
+  },
+  "peerDependencies": {
+    "@rainbow-me/rainbowkit": ">=0.5.0",
+    "@randombits/use-siwe": "^1.1.1",
+    "react": ">=17"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "lint-staged": {
+    "*.{js,json,css,md}": "prettier --write"
+  }
+}
