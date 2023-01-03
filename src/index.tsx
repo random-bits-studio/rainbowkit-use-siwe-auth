@@ -3,47 +3,17 @@ import {
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
 import React, { PropsWithChildren } from "react";
-import { useSiwe } from "@randombits/use-siwe";
-import { SiweMessage } from "siwe";
+import { createMessage, getMessageBody, signOut, useSession, verify } from "@randombits/use-siwe";
 
 const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
-  const { isLoading, authenticated, nonce, signin, signout } = useSiwe();
+  const { authenticated, nonce, isLoading } = useSession();
+
   const adapter = createAuthenticationAdapter({
-    createMessage: ({ address, chainId, nonce }) => {
-      return new SiweMessage({
-        address,
-        chainId,
-        nonce,
-        domain: window.location.host,
-        uri: window.location.origin,
-        version: "1",
-      });
-    },
-
-    getMessageBody: ({ message }) => {
-      return message.prepareMessage();
-    },
-
-    getNonce: async () => {
-      if (!nonce) throw new Error("Nonce is not defined");
-      return nonce;
-    },
-
-    signOut: async () => {
-      if (!signout) throw new Error("Auth not ready");
-      await signout();
-    },
-
-    verify: async ({ message, signature }) => {
-      if (!signin) throw new Error("Auth not ready");
-
-      try {
-        await signin(JSON.stringify(message), signature);
-        return true;
-      } catch (_error) {
-        return false;
-      }
-    },
+    createMessage,
+    getMessageBody,
+    getNonce: async () => nonce,
+    signOut,
+    verify,
   });
 
   const status = isLoading
