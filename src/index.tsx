@@ -13,7 +13,10 @@ const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
     createMessage,
     getMessageBody,
     getNonce: async () => nonce,
-    signOut: () => signOut(options),
+    signOut: async () => {
+      await signOut(options);
+      refetch();
+    },
     verify: async (args) => {
       const result = await verify(args, options);
       if (result) refetch();
