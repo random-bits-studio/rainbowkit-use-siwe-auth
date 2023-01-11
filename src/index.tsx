@@ -6,7 +6,7 @@ import React, { PropsWithChildren } from "react";
 import { createMessage, getMessageBody, signOut, useOptions, useSession, verify } from "@randombits/use-siwe";
 
 const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
-  const { authenticated, nonce, isLoading } = useSession();
+  const { authenticated, nonce, isLoading, refetch } = useSession();
   const options = useOptions();
 
   const adapter = createAuthenticationAdapter({
@@ -14,7 +14,11 @@ const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
     getMessageBody,
     getNonce: async () => nonce,
     signOut: () => signOut(options),
-    verify: (args) => verify(args, options),
+    verify: async (args) => {
+      const result = await verify(args, options);
+      if (result) refetch();
+      return result;
+    },
   });
 
   const status = isLoading
