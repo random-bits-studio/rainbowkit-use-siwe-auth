@@ -80,7 +80,7 @@ Follow the **Getting Started** instructions in the
 for configuring Iron Session, Setting up the API routes, and wrapping your app
 with `<SiweProvider>`.
 
-Your application tree should now contain the following:
+Once completed, your application tree should now contain the following:
 
 ```
 my-project
@@ -143,8 +143,7 @@ export default function App({ Component, pageProps }: AppProps) {
 `ConnectButton` and connect a wallet, a second modal will pop up asking you to
 sign a message to complete the SIWE flow.
 
-Next, we will explain how to check if a user has been authenticated client-side
-and server-side.
+To learn how to check if a user is authenticated, read on!
 
 ### Check to see if a user is authenticated
 
