@@ -1,55 +1,187 @@
 # UseSIWE + RainbowKit = ❤️
 
-TODO: Intro
+This package is a [RainbowKit](https://www.rainbowkit.com) authentication
+adapter for [UseSIWE](https://github.com/random-bits-studio/use-siwe).
 
-# Table of Contents
+This is by far the easiest way to add Sign-In with Ethereum support to your
+application!
+
+## Table of Contents
 
 - [Installation](#installation)
 - [Getting Started](#getting-started)
   - [Setup RainbowKit](#setup-rainbowkit)
-  - [Setup UseSiwe](#setup-usesiwe)
+  - [Setup UseSIWE](#setup-usesiwe)
   - [Add the UseSIWE authentication adapter](#add-the-usesiwe-authentication-adapter)
   - [Check to see if a user is authenticated](#check-to-see-if-a-user-is-authenticated)
-- [API](#api)
-  - [RainbowKitUseSiweProvider](#rainbowkitusesiweprovider)
 
-# Installation
+## Installation
 
 To install `rainbowkit-use-siwe-auth` and it's dependencies run the following
 command:
 
 ```
-npm install @randombits/rainbowkit-use-siwe-auth @randombits/use-siwe wagmi ethers iron-session
+npm install @randombits/rainbowkit-use-siwe-auth @randombits/use-siwe @rainbow-me/rainbowkit wagmi ethers iron-session
 ```
 
-# Getting Started
+## Getting Started
 
-## Setup RainbowKit
+### Setup RainbowKit
 
-TODO
+Follow the instructions on the [RainbowKit Docs](https://www.rainbowkit.com/docs/installation)
+to setup Rainbowkit in your app. In the end you should have an `_app.tsx` (if
+using [Next.js](https://nextjs.org)) that looks something like this:
 
-## Setup UseSiwe
+```
+import '@/styles/globals.css'
+import '@rainbow-me/rainbowkit/styles.css'
+import type { AppProps } from 'next/app'
+import {
+  getDefaultWallets,
+  RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+import { configureChains, createClient, WagmiConfig } from 'wagmi';
+import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
+import { publicProvider } from 'wagmi/providers/public';
 
-TODO
+const { chains, provider } = configureChains(
+  [mainnet, polygon, optimism, arbitrum],
+  [publicProvider()]
+);
 
-## Add the UseSIWE authentication adapter
+const { connectors } = getDefaultWallets({
+  appName: 'My RainbowKit App',
+  chains
+});
 
-TODO
+const wagmiClient = createClient({
+  autoConnect: true,
+  connectors,
+  provider
+})
 
-## Check to see if a user is authenticated
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider chains={chains}>
+        <Component {...pageProps} />
+      </RainbowKitProvider>
+    </WagmiConfig>
+  );
+}
+```
 
-TODO
+...and you should have added a `<ConnectButton />` somewhere in your application.
 
-# API
+### Setup UseSIWE
 
-## RainbowKitUseSiweProvider
+Follow the **Getting Started** instructions in the
+[UseSIWE Docs](https://github.com/random-bits-studio/use-siwe#getting-started)
+for configuring Iron Session, Setting up the API routes, and wrapping your app
+with `<SiweProvider>`.
 
-TODO: desc
+Your application tree should now contain the following:
 
-### Usage
+```
+my-project
+├── lib
+│   └── ironOptions.ts <----
+├── package.json
+├── pages
+│   ├── _app.tsx
+│   ├── _document.tsx
+│   ├── api
+│   │   ├── auth
+│   │   │   └── [[...route]].ts <----
+│   │   └── hello.ts
+│   └── index.tsx
+├── public
+└── styles
+```
 
-TODO
+...and the providers wrapping your application should look like this:
 
-### Props
+```
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <WagmiConfig client={wagmiClient}>
+      <SiweProvider>
+        <RainbowKitProvider chains={chains}>
+          <Component {...pageProps} />
+        </RainbowKitProvider>
+      </SiweProvider>
+    </WagmiConfig>
+  );
+}
+```
 
-- `children?: ReactNode | undefined`
+### Add the UseSIWE authentication adapter
+
+One more provider and this pyramid is complete! Add the
+`RainbowKitUseSiweProvider` inside of the `SiweProvider` so that it contains
+the `RainbowKitProvider`. Example below:
+
+```
+import RainbowKitUseSiweProvider from '@randombits/rainbowkit-use-siwe-auth';
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <WagmiConfig client={wagmiClient}>
+      <SiweProvider>
+        <RainbowKitUseSiweProvider>
+          <RainbowKitProvider chains={chains}>
+            <Component {...pageProps} />
+          </RainbowKitProvider>
+        </RainbowKitUseSiweProvider>
+      </SiweProvider>
+    </WagmiConfig>
+  );
+}
+```
+
+**Technically thats it!** Now when you run your app and click on the
+`ConnectButton` and connect a wallet, a second modal will pop up asking you to
+sign a message to complete the SIWE flow.
+
+Next, we will explain how to check if a user has been authenticated client-side
+and server-side.
+
+### Check to see if a user is authenticated
+
+#### Client-side
+
+Check to see is a user is authenticated with the `useSession` hook from
+[UseSiwe](https://github.com/random-bits-studio/use-siwe) like in the example
+below:
+
+```
+import { useSession } from "@randombits/use-siwe";
+
+export const AuthCheck = () => {
+  const { isLoading, authenticated, address } = useSession();
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!authenticated) return <p>Not authenticated</p>;
+  return <p>{address} is Authenticated</p>;
+};
+```
+
+#### Server-side
+
+For API routes, wrap your API handler with `withIronSessionApiRoute` and check
+to see if `req.session.address` is set. If a user is authenticated,
+`req.session.address` will be set to their address, otherwise it will be
+`undefined`.
+
+```
+import ironOptions from '@/lib/ironOptions'
+import { withIronSessionApiRoute } from 'iron-session/next/dist'
+import type { NextApiHandler } from 'next'
+
+const handler: NextApiHandler = (req, res) => {
+  if (!req.session.address) return res.status(401).send("Unauthorized");
+  res.status(200).send(`Hello, ${req.session.address}!`);
+}
+
+export default withIronSessionApiRoute(handler, ironOptions);
+```
