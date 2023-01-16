@@ -37,7 +37,7 @@
   "homepage": "https://github.com/random-bits-studio/rainbowkit-use-siwe-auth#readme",
   "devDependencies": {
     "@rainbow-me/rainbowkit": "^0.8.1",
-    "@randombits/use-siwe": "^2.0.1",
+    "@randombits/use-siwe": "^2.0.2",
     "@types/react": "^18.0.26",
     "husky": "^8.0.3",
     "lint-staged": "^13.0.4",
