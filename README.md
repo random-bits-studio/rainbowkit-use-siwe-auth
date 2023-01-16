@@ -184,3 +184,32 @@ const handler: NextApiHandler = (req, res) => {
 
 export default withIronSessionApiRoute(handler, ironOptions);
 ```
+
+### Taking action on Sign-In and Sign-Out
+
+The `RainbowKitUseSiweProvider` component takes two optional props; `onSignIn`
+and `onSignOut`. You may pass a function that will be called after a successful
+sign-in or sign-out; for instance to redirect a user to a different page.
+
+```
+import RainbowKitUseSiweProvider from '@randombits/rainbowkit-use-siwe-auth';
+import { useRouter } from 'next/router';
+
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const onSignIn = () => router.push('/dashboard');
+  const onSignOut = () => router.push('/');
+
+  return (
+    <WagmiConfig client={wagmiClient}>
+      <SiweProvider>
+        <RainbowKitUseSiweProvider onSignIn={onSignIn} onSignOut={onSignOut}>
+          <RainbowKitProvider chains={chains}>
+            <Component {...pageProps} />
+          </RainbowKitProvider>
+        </RainbowKitUseSiweProvider>
+      </SiweProvider>
+    </WagmiConfig>
+  );
+}
+```

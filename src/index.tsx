@@ -2,10 +2,16 @@ import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
-import React, { PropsWithChildren } from "react";
+import React, { ReactNode } from "react";
 import { createMessage, getMessageBody, signOut, useOptions, useSession, verify } from "@randombits/use-siwe";
 
-const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
+type RainbowKitUseSiweProviderProps = {
+  children?: ReactNode,
+  onSignIn?: () => void,
+  onSignOut?: () => void,
+};
+
+export const RainbowKitUseSiweProvider = ({ children, onSignIn, onSignOut }: RainbowKitUseSiweProviderProps) => {
   const { authenticated, nonce, isLoading, refetch } = useSession();
   const options = useOptions();
 
@@ -16,10 +22,12 @@ const RainbowKitUseSiweProvider = ({ children }: PropsWithChildren) => {
     signOut: async () => {
       await signOut(options);
       refetch();
+      if (onSignOut) onSignOut();
     },
     verify: async (args) => {
       const result = await verify(args, options);
       if (result) refetch();
+      if (result && onSignIn) onSignIn();
       return result;
     },
   });
